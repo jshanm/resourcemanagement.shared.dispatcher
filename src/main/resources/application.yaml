@@ -1,3 +1,16 @@
 server:
   port: 8081
+security:
+  oauth2:
+    client:
+      client-id: client
+      id: client
+      client-secret: secret
+      registration:
+        client-id: client
+        id: client
+        client-secret: secret
+
+
+
 

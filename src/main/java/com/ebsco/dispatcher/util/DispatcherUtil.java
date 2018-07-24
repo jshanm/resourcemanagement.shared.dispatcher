@@ -1,8 +1,9 @@
 package com.ebsco.dispatcher.util;
 
+
 import javax.servlet.http.HttpServletRequest;
 import java.nio.charset.StandardCharsets;
-import java.util.Base64;
+import java.util.*;
 
 public class DispatcherUtil {
 
@@ -22,4 +23,16 @@ public class DispatcherUtil {
         return encoded;
     }
 
+    public static Map<String, String> mapQueryParam(HttpServletRequest request) {
+
+        String[] params = request.getQueryString().toString().split("&");
+        Map<String, String> map = new HashMap<String, String>();
+        for (String param : params)
+        {
+            String name = param.split("=")[0];
+            String value = param.split("=")[1];
+            map.put(name, value);
+        }
+        return map;
+    }
 }
