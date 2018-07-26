@@ -12,5 +12,29 @@ security:
         client-secret: secret
 
 
-
-
+clients:
+  registeredClients:
+    -
+      id: client1
+      clientSecret: secret
+      grantType:
+        - authorization_code
+      scope:
+        - user_info
+        - read
+        - write
+      registeredRedirectURI:
+        - https://www.getpostman.com/oauth2/callback
+        - https://resolver.ebscohost.com/openurl
+    -
+      id: client2
+      clientSecret: secret
+      grantType:
+        - authorization_code
+      scope:
+        - user_info
+        - read
+        - write
+      registeredRedirectURI:
+        - https://www.getpostman.com/oauth2/callback
+        - https://resolver.ebscohost.com/openurl

@@ -10,6 +10,9 @@ import org.springframework.security.oauth2.config.annotation.web.configuration.A
 import org.springframework.security.oauth2.config.annotation.web.configuration.EnableAuthorizationServer;
 import org.springframework.security.oauth2.config.annotation.web.configurers.AuthorizationServerEndpointsConfigurer;
 import org.springframework.security.oauth2.config.annotation.web.configurers.AuthorizationServerSecurityConfigurer;
+import org.springframework.security.oauth2.provider.OAuth2Authentication;
+import org.springframework.security.oauth2.provider.code.AuthorizationCodeServices;
+import org.springframework.security.oauth2.provider.code.RandomValueAuthorizationCodeServices;
 
 
 @Configuration
@@ -24,6 +27,29 @@ public class AuthorizationServerConfig extends AuthorizationServerConfigurerAdap
             AuthorizationServerSecurityConfigurer oauthServer) throws Exception {
         oauthServer.tokenKeyAccess("permitAll()")
                 .checkTokenAccess("isAuthenticated()");
+    }
+
+    @Override
+    public void configure(AuthorizationServerEndpointsConfigurer endpoints) throws Exception {
+        //endpoints.authenticationManager(authenticationManager);
+        //endpoints.tokenStore(tokenStore);
+        //endpoints.tokenGranter(tokenGranter);
+
+        AuthorizationCodeServices codeServices = new RandomValueAuthorizationCodeServices() {
+            @Override
+            protected void store(String code, OAuth2Authentication authentication) {
+
+                System.out.println("Storing Authorization Code");
+
+            }
+
+            @Override
+            protected OAuth2Authentication remove(String code) {
+                return null;
+            }
+        };
+
+        endpoints.authorizationCodeServices(codeServices);
     }
 
     @Override

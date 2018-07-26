@@ -5,9 +5,12 @@ import com.ebsco.dispatcher.util.DispatcherUtil;
 import org.codehaus.httpcache4j.uri.URIBuilder;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.web.authentication.LoginUrlAuthenticationEntryPoint;
+
+import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
 
@@ -23,9 +26,11 @@ public class LoginEntryPointer extends LoginUrlAuthenticationEntryPoint {
 
     //TODO: Use this method to create custom login URL based on the client\
     //Temporary: Get Login URL from AppProperties and add authorizationContext
-    //@Override
+    @Override
     protected String buildRedirectUrlToLoginPage(HttpServletRequest request, HttpServletResponse response,
                                                  AuthenticationException authException) {
+
+        System.out.println("Start: LoginEntryPoint: buildRedirectUrlToLoginPage");
 
         String authorizationContext = DispatcherUtil.base64Encode(DispatcherUtil.getUrlFromRequest(request));
         try {
@@ -44,4 +49,10 @@ public class LoginEntryPointer extends LoginUrlAuthenticationEntryPoint {
                 .addParameter("authType", AuthTypeUtil.getAuthType(request))
                 .toURI(); //TODO: Add the String to application.yaml
     }
+
+    /*public void commence(HttpServletRequest request, HttpServletResponse response,
+                         AuthenticationException authException) throws IOException, ServletException {
+        System.out.println("Start: LoginEntryPoint: Commence");
+        System.out.println("EXCEPPPTIONNNNN-=-=-=: " + authException.getLocalizedMessage());
+    }*/
 }
