@@ -2,6 +2,9 @@ package com.ebsco.dispatcher.util;
 
 import javax.servlet.http.HttpServletRequest;
 
+/**
+ * @author jshanmugam
+ */
 public class AuthTypeUtil {
 
     public static String getAuthTypeFromACR(String acr) {

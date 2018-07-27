@@ -1,8 +1,10 @@
 package com.ebsco.dispatcher.config;
 
+import com.ebsco.dispatcher.model.Client;
 import com.ebsco.dispatcher.util.AuthTypeUtil;
 import com.ebsco.dispatcher.util.DispatcherUtil;
 import org.codehaus.httpcache4j.uri.URIBuilder;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.web.authentication.LoginUrlAuthenticationEntryPoint;
 
@@ -13,6 +15,14 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.Map;
+import java.util.Optional;
+
+/**
+ * @author jshanmugam
+ * @see org.springframework.security.web.authentication.LoginUrlAuthenticationEntryPoint
+ * @see org.springframework.security.web.AuthenticationEntryPoint
+ */
 
 public class LoginEntryPointer extends LoginUrlAuthenticationEntryPoint {
     /**
@@ -24,8 +34,9 @@ public class LoginEntryPointer extends LoginUrlAuthenticationEntryPoint {
         super(loginFormUrl);
     }
 
-    //TODO: Use this method to create custom login URL based on the client\
-    //Temporary: Get Login URL from AppProperties and add authorizationContext
+    @Autowired
+    private ClientConfiguration clientConfig;
+
     @Override
     protected String buildRedirectUrlToLoginPage(HttpServletRequest request, HttpServletResponse response,
                                                  AuthenticationException authException) {
@@ -34,8 +45,9 @@ public class LoginEntryPointer extends LoginUrlAuthenticationEntryPoint {
 
         String authorizationContext = DispatcherUtil.base64Encode(DispatcherUtil.getUrlFromRequest(request));
         try {
-            //TODO: Get the webAuthLoginUrl from application.yaml
-            return addParamsToLoginUrl(request, this.getLoginFormUrl(), authorizationContext).toString();
+
+            String loginUrl = this.determineUrlToUseForThisRequest(request, response, authException);
+            return addParamsToLoginUrl(request, loginUrl, authorizationContext).toString();
         } catch (URISyntaxException e) {
             e.printStackTrace();
         }
@@ -50,9 +62,17 @@ public class LoginEntryPointer extends LoginUrlAuthenticationEntryPoint {
                 .toURI(); //TODO: Add the String to application.yaml
     }
 
-    /*public void commence(HttpServletRequest request, HttpServletResponse response,
-                         AuthenticationException authException) throws IOException, ServletException {
-        System.out.println("Start: LoginEntryPoint: Commence");
-        System.out.println("EXCEPPPTIONNNNN-=-=-=: " + authException.getLocalizedMessage());
-    }*/
+    @Override
+    protected String determineUrlToUseForThisRequest(HttpServletRequest request,
+                                                     HttpServletResponse response, AuthenticationException exception) {
+
+        Map<String, String> queryParameters = DispatcherUtil.mapQueryParam(request);
+        Optional<String> clientIdFromRequest = Optional.of(queryParameters.get("client_id"));
+
+        if(clientIdFromRequest.isPresent()) {
+            Optional<Client> client = Optional.of(clientConfig.loadClientById(clientIdFromRequest.get()));
+            return client.get().getLoginUrl();
+        }
+        return getLoginFormUrl();
+    }
 }

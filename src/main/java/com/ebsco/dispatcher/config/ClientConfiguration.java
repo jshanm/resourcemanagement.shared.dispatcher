@@ -6,6 +6,10 @@ import org.springframework.context.annotation.Configuration;
 
 import java.util.List;
 
+/**
+ * @author jshanmugam
+ */
+
 @ConfigurationProperties(prefix = "clients")
 @Configuration
 public class ClientConfiguration {
@@ -18,5 +22,12 @@ public class ClientConfiguration {
 
     public void setRegisteredClients(List<Client> registeredClients) {
         this.registeredClients = registeredClients;
+    }
+
+    public Client loadClientById(String id) {
+        return this.getRegisteredClients().stream()
+                .filter(t -> t.getId().equals(id))
+                .findAny()
+                .orElse(null);
     }
 }

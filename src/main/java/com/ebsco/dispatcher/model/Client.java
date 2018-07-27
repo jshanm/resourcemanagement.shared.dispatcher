@@ -2,6 +2,9 @@ package com.ebsco.dispatcher.model;
 
 import java.util.List;
 
+/**
+ * @author jshanmugam
+ */
 public class Client {
 
     private String id;
@@ -9,6 +12,7 @@ public class Client {
     private List<String> registeredRedirectURI;
     private List<String> grantType;
     private List<String> scope;
+    private  String loginUrl;
 
     public String getId() {
         return id;
@@ -46,7 +50,17 @@ public class Client {
         return scope;
     }
 
+    public String getLoginUrl() {
+        return loginUrl;
+    }
+
+    public void setLoginUrl(String loginUrl) {
+        this.loginUrl = loginUrl;
+    }
+
     public void setScope(List<String> scope) {
         this.scope = scope;
     }
+
+
 }
