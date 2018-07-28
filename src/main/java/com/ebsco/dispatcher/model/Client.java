@@ -1,6 +1,7 @@
 package com.ebsco.dispatcher.model;
 
 import java.util.List;
+import java.util.Set;
 
 /**
  * @author jshanmugam
@@ -9,9 +10,9 @@ public class Client {
 
     private String id;
     private String clientSecret;
-    private List<String> registeredRedirectURI;
-    private List<String> grantType;
-    private List<String> scope;
+    private Set<String> registeredRedirectURI;
+    private Set<String> grantType;
+    private Set<String> scope;
     private  String loginUrl;
 
     public String getId() {
@@ -30,23 +31,23 @@ public class Client {
         this.clientSecret = clientSecret;
     }
 
-    public List<String> getRegisteredRedirectURI() {
+    public Set<String> getRegisteredRedirectURI() {
         return registeredRedirectURI;
     }
 
-    public void setRegisteredRedirectURI(List<String> registeredRedirectURI) {
+    public void setRegisteredRedirectURI(Set<String> registeredRedirectURI) {
         this.registeredRedirectURI = registeredRedirectURI;
     }
 
-    public List<String> getGrantType() {
+    public Set<String> getGrantType() {
         return grantType;
     }
 
-    public void setGrantType(List<String> grantType) {
+    public void setGrantType(Set<String> grantType) {
         this.grantType = grantType;
     }
 
-    public List<String> getScope() {
+    public Set<String> getScope() {
         return scope;
     }
 
@@ -58,7 +59,7 @@ public class Client {
         this.loginUrl = loginUrl;
     }
 
-    public void setScope(List<String> scope) {
+    public void setScope(Set<String> scope) {
         this.scope = scope;
     }
 

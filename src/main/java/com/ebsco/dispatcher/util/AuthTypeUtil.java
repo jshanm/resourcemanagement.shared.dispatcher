@@ -16,6 +16,11 @@ public class AuthTypeUtil {
 
     public static String getAuthType(HttpServletRequest request) {
 
-        return request.getAttribute("auth_type").toString();
+        if(request.getAttribute("auth_type")!=null) {
+            return request.getAttribute("auth_type").toString();
+        }
+
+        return "";
+
     }
 }

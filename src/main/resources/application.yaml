@@ -40,4 +40,4 @@ clients:
       registeredRedirectURI:
         - https://www.getpostman.com/oauth2/callback
         - https://resolver.ebscohost.com/openurl
-      loginUrl: http://auth.devqa.ebsco.zone/api/oidcprovider
+      loginUrl: http://auth.ebsco.zone/api/oidcprovider

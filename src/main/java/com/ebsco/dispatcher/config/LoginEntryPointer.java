@@ -67,11 +67,12 @@ public class LoginEntryPointer extends LoginUrlAuthenticationEntryPoint {
                                                      HttpServletResponse response, AuthenticationException exception) {
 
         Map<String, String> queryParameters = DispatcherUtil.mapQueryParam(request);
-        Optional<String> clientIdFromRequest = Optional.of(queryParameters.get("client_id"));
-
-        if(clientIdFromRequest.isPresent()) {
-            Optional<Client> client = Optional.of(clientConfig.loadClientById(clientIdFromRequest.get()));
-            return client.get().getLoginUrl();
+        if(!queryParameters.isEmpty()) {
+            Optional<String> clientIdFromRequest = Optional.of(queryParameters.get("client_id"));
+            if(clientIdFromRequest.isPresent()) {
+                Optional<Client> client = Optional.of(clientConfig.loadClientById(clientIdFromRequest.get()));
+                return client.get().getLoginUrl();
+            } //TODO: Implement "else" logic
         }
         return getLoginFormUrl();
     }

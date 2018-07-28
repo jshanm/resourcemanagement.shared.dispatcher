@@ -1,6 +1,7 @@
 package com.ebsco.dispatcher.filters;
 
 import com.ebsco.dispatcher.util.AuthTypeUtil;
+import com.ebsco.dispatcher.util.DispatcherUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.web.filter.OncePerRequestFilter;
@@ -26,6 +27,15 @@ public class AcrFilter  extends OncePerRequestFilter {
 
         LOGGER.debug("Start: AcrFilter");
         System.out.println("Start: AcrFilter");
+
+        HttpServletRequest req = (HttpServletRequest) request;
+        HttpServletResponse res = (HttpServletResponse) response;
+
+        // skip everything that's not an authorize URL
+        if (!DispatcherUtil.getPath(req).startsWith("/authorize")) {
+            filterChain.doFilter(req, res);
+            return;
+        }
 
         if (request.getParameter("acr")!=null) {
             //TODO: Implement ACR-->AuthType Mapping

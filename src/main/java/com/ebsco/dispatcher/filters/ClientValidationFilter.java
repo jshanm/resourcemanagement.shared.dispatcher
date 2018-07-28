@@ -4,9 +4,6 @@ import com.ebsco.dispatcher.config.ClientConfiguration;
 import com.ebsco.dispatcher.model.Client;
 import com.ebsco.dispatcher.util.DispatcherUtil;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.oauth2.provider.ClientDetails;
-import org.springframework.security.oauth2.provider.ClientDetailsService;
-import org.springframework.security.oauth2.provider.client.InMemoryClientDetailsService;
 import org.springframework.web.filter.GenericFilterBean;
 
 import javax.servlet.FilterChain;
@@ -19,6 +16,7 @@ import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 
 /**
  * @author jshanmugam
@@ -32,22 +30,31 @@ public class ClientValidationFilter extends GenericFilterBean {
     @Override
     public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain) throws IOException, ServletException {
 
+        System.out.println("START: ClientValidationFilter");
+
         HttpServletRequest req = (HttpServletRequest) request;
         HttpServletResponse res = (HttpServletResponse) response;
 
-        System.out.println("START: ClientValidationFilter");
-
-        Map<String, String> queryParameters = DispatcherUtil.mapQueryParam(req);
-        Optional<String> clientIdFromRequest = Optional.of(queryParameters.get("client_id"));
-
-        ClientDetailsService clientDetailsService = null;
-        try {
-            clientDetailsService = DispatcherUtil.getClientDetailsService();
-        } catch (Exception e) {
-            e.printStackTrace();
+        // skip everything that's not an authorize URL
+        if (!DispatcherUtil.getPath(req).startsWith("/authorize")) {
+            chain.doFilter(req, res);
+            return;
         }
 
-        ClientDetails client1 = clientDetailsService.loadClientByClientId("webauth");
+        //Continue if it is /authorize
+        doClientValidation(req, res, chain);
+    }
+
+    private void doClientValidation(HttpServletRequest req, HttpServletResponse res, FilterChain chain) throws IOException, ServletException {
+
+        Map<String, String> queryParameters = DispatcherUtil.mapQueryParam(req);
+
+        if (queryParameters.isEmpty()) {
+            res.sendError(HttpServletResponse.SC_BAD_REQUEST, "Internal Server Error");//TODO:Send OpenID standard HTTP and message
+            return;
+        }
+        Optional<String> clientIdFromRequest = Optional.of(queryParameters.get("client_id"));
+
 
         Optional<String> redirectUriFromRequest = Optional.of(queryParameters.get("redirect_uri"));
 
@@ -79,7 +86,7 @@ public class ClientValidationFilter extends GenericFilterBean {
         Optional<Client> client = Optional.of(clientConfig.loadClientById(clientIdFromRequest.get()));
 
         //Get the registered redirectURIs for the client.
-        Optional<List<String>> registeredRedirectURIs = Optional.of(client.get().getRegisteredRedirectURI());
+        Optional<Set<String>> registeredRedirectURIs = Optional.of(client.get().getRegisteredRedirectURI());
 
         Boolean isRedirectUriValid = registeredRedirectURIs.get().stream()
                 .anyMatch(r -> r.equalsIgnoreCase(redirectUriFromRequest.get()));
@@ -94,6 +101,8 @@ public class ClientValidationFilter extends GenericFilterBean {
         }
 
         System.out.println("END: ClientValidationFilter");
-        chain.doFilter(request, response);
+        chain.doFilter(req, res);
     }
-}
+
+
+    }
