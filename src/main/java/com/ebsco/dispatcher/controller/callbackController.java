@@ -12,6 +12,7 @@ import java.io.IOException;
 @RequestMapping("callback")
 public class callbackController {
 
+    //TODO: Make Swagger configuration
     @RequestMapping(value = "/webauth", method = RequestMethod.GET)
     @ApiResponses(value = {
             @ApiResponse(code = 302, message = "OK"),
