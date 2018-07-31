@@ -33,6 +33,7 @@ public class AcrFilter  extends OncePerRequestFilter {
 
         // skip everything that's not an authorize URL
         if (!DispatcherUtil.getPath(req).startsWith("/authorize")) {
+            System.out.println("SKIP: AcrFilter");
             filterChain.doFilter(req, res);
             return;
         }

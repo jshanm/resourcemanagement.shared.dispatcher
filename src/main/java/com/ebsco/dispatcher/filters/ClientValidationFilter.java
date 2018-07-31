@@ -37,6 +37,7 @@ public class ClientValidationFilter extends GenericFilterBean {
 
         // skip everything that's not an authorize URL
         if (!DispatcherUtil.getPath(req).startsWith("/authorize")) {
+            System.out.println("SKIP: ClientValidationFilter");
             chain.doFilter(req, res);
             return;
         }

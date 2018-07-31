@@ -54,6 +54,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 .antMatchers("/swagger-ui.html").permitAll()
                 .antMatchers("/swagger**").permitAll()
                 .antMatchers(HttpMethod.GET, "/callback/**").permitAll()
+                .antMatchers("/token/**").permitAll()
                 .anyRequest().authenticated()
                 .and().exceptionHandling()
                 .authenticationEntryPoint(getAuthenticationEntryPoint());
