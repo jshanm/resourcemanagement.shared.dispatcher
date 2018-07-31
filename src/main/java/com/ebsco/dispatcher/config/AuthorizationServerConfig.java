@@ -1,5 +1,6 @@
 package com.ebsco.dispatcher.config;
 
+import com.ebsco.dispatcher.dao.DynamoDBTokenStore;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -49,6 +50,8 @@ public class AuthorizationServerConfig extends AuthorizationServerConfigurerAdap
         return new InMemoryTokenStore();
     }
 
+    public TokenStore dynamoDBTokenStore;
+
     /*@Bean
     public TokenStore inMemoryTokenStore() {
         return new InMemoryTokenStore();
@@ -66,8 +69,7 @@ public class AuthorizationServerConfig extends AuthorizationServerConfigurerAdap
     @Override
     public void configure(AuthorizationServerEndpointsConfigurer endpoints) throws Exception {
 
-        endpoints.tokenStore(inMemoryTokenStore());
-        endpoints.tokenServices()
+        endpoints.tokenStore(dynamoDBTokenStore);
         System.out.println("findTokensByClientId: " + endpoints.getTokenStore().findTokensByClientId("webauth"));
     }
 

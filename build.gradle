@@ -9,6 +9,8 @@ buildscript {
         datadogVersion			= '1.1.6'
         cloudSleuthVersion = '1.1.2.RELEASE'
         jwtWebTokenNimbusVersion = '4.23'
+        dynamodbVersion = '1.11.128'
+
     }
 
     repositories {
@@ -84,6 +86,11 @@ dependencies {
     // Swagger dependencies
     compile group:'io.springfox', name: 'springfox-swagger2', 	version:"${project.ext['swaggerVersion']}", transitive: true
     compile group:'io.springfox', name: 'springfox-swagger-ui', version:"${project.ext['swaggerVersion']}", transitive: true
+
+    // https://mvnrepository.com/artifact/com.amazonaws/aws-java-sdk-dynamodb
+    compile group: 'com.amazonaws', name: 'aws-java-sdk-dynamodb', version: dynamodbVersion
+
+
 
 
 

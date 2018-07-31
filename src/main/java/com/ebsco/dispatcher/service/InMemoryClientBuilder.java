@@ -1,40 +1,54 @@
-package com.ebsco.dispatcher.Service;
+package com.ebsco.dispatcher.service;
 
 import com.ebsco.dispatcher.config.ClientConfiguration;
 import com.ebsco.dispatcher.model.Client;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Scope;
 import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.oauth2.config.annotation.builders.InMemoryClientDetailsServiceBuilder;
 import org.springframework.security.oauth2.provider.ClientDetails;
 import org.springframework.security.oauth2.provider.ClientDetailsService;
-import org.springframework.security.oauth2.provider.ClientRegistrationException;
-import org.springframework.stereotype.Service;
 
 import java.util.*;
 
-//TODO: Utilize this class when we call the Auth0 server to get the client details.
+/**
+ * @author jshanmugam
+ */
 
-@Service
-public class InMemoryClientService implements ClientDetailsService {
+@Scope(value = ConfigurableBeanFactory.SCOPE_SINGLETON)
+public class InMemoryClientBuilder extends InMemoryClientDetailsServiceBuilder {
 
     @Bean
-    public static BCryptPasswordEncoder passwordEncoder(){
-        return new BCryptPasswordEncoder();
+    private ClientConfiguration getClientConfig() {
+        return new ClientConfiguration();
     }
 
-    @Autowired
-    private ClientConfiguration clientConfig;
-
     @Override
-    public ClientDetails loadClientByClientId(String clientId) throws ClientRegistrationException {
+    protected ClientDetailsService performBuild() {
 
-        Optional<Client> client = Optional.of(clientConfig.loadClientById(clientId));
+        //Get the registered clients from the Configuration
+        Optional<List<Client>> registeredClients = Optional.of(getClientConfig().getRegisteredClients());
+
+        //Add ClientDetails from ClientConfiguration
+        registeredClients.get().stream()
+                .forEach(c -> {
+                    this.addClient(c.getId(), mapClientDetails(c));
+                });
+        try {
+            return this.build();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    private ClientDetails mapClientDetails(Client client){
 
         ClientDetails clientDetails = new ClientDetails() {
             @Override
             public String getClientId() {
-                return client.get().getId();
+                return client.getId();
             }
 
             @Override
@@ -49,7 +63,7 @@ public class InMemoryClientService implements ClientDetailsService {
 
             @Override
             public String getClientSecret() {
-                return client.get().getClientSecret();
+                return client.getClientSecret();
             }
 
             @Override
@@ -59,17 +73,17 @@ public class InMemoryClientService implements ClientDetailsService {
 
             @Override
             public Set<String> getScope() {
-                return client.get().getScope();
+                return client.getScope();
             }
 
             @Override
             public Set<String> getAuthorizedGrantTypes() {
-                return client.get().getGrantType();
+                return client.getGrantType();
             }
 
             @Override
             public Set<String> getRegisteredRedirectUri() {
-                return client.get().getRegisteredRedirectURI();
+                return client.getRegisteredRedirectURI();
             }
 
             @Override
@@ -102,6 +116,3 @@ public class InMemoryClientService implements ClientDetailsService {
     }
 
 }
-
-
-
