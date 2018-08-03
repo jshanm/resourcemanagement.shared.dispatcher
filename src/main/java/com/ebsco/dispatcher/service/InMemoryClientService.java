@@ -23,17 +23,19 @@ public class InMemoryClientService implements ClientDetailsService {
         return new BCryptPasswordEncoder();
     }
 
-    @Autowired
-    private ClientConfiguration clientConfig;
+    @Bean
+    private ClientConfiguration clientConfig() {
+        return new ClientConfiguration();
+    }
 
     @Override
     public ClientDetails loadClientByClientId(String clientId) throws ClientRegistrationException {
 
-        Optional<Client> client = Optional.of(clientConfig.loadClientById(clientId));
+        Optional<Client> client = Optional.of(clientConfig().loadClientById(clientId));
 
         ClientDetails clientDetails = new ClientDetails() {
             @Override
-            public String getClientId() {
+               public String getClientId() {
                 return client.get().getId();
             }
 

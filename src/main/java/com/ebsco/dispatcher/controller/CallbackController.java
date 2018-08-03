@@ -45,7 +45,7 @@ public class CallbackController {
     }
 
     //TODO: Make Swagger configuration
-    @RequestMapping(value = "/webauth", method = RequestMethod.GET)
+    @RequestMapping(value = "/resolver", method = RequestMethod.GET)
     @ApiResponses(value = {
             @ApiResponse(code = 302, message = "OK"),
             @ApiResponse(code = 400,
@@ -94,7 +94,7 @@ public class CallbackController {
 
     }
 
-    private OAuth2Request createOAuth2Request(String authCode, Map<String, String> queryParameters) {
+    public OAuth2Request createOAuth2Request(String authCode, Map<String, String> queryParameters) { //TODO: Change this to private
 
         GrantedAuthority authority = new GrantedAuthority() {
             @Override
@@ -118,11 +118,11 @@ public class CallbackController {
         extensionProperties.put("auth_code", authCode);
 
 
-        OAuth2Request oAuth2Request =  new OAuth2Request(queryParameters, "webauth", authorities,  true, scope, null, redirectUri, responseTypes, extensionProperties);
+        OAuth2Request oAuth2Request =  new OAuth2Request(queryParameters, "resolver", authorities,  true, scope, null, redirectUri, responseTypes, extensionProperties);
         return oAuth2Request;
     }
 
-    private Authentication createAuthentication(UserInformation userInformation) {
+    public Authentication createAuthentication(UserInformation userInformation) { //Change this to private
 
         GrantedAuthority authority = new GrantedAuthority() {
             @Override

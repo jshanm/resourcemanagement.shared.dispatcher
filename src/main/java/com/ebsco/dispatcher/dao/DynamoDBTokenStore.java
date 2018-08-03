@@ -4,12 +4,19 @@ import com.amazonaws.services.dynamodbv2.document.DynamoDB;
 import com.amazonaws.services.dynamodbv2.document.Item;
 import com.ebsco.dispatcher.mapper.OAuth2AccessTokenMapper;
 import com.ebsco.dispatcher.mapper.OAuth2AccessTokenMapperImpl;
+import com.ebsco.dispatcher.model.SerializableOAuth2Authentication;
+import com.ebsco.dispatcher.util.DispatcherUtil;
+import com.fasterxml.jackson.core.JsonGenerationException;
+import com.fasterxml.jackson.databind.JsonMappingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.oauth2.common.OAuth2AccessToken;
 import org.springframework.security.oauth2.common.OAuth2RefreshToken;
 import org.springframework.security.oauth2.provider.OAuth2Authentication;
 import org.springframework.security.oauth2.provider.token.TokenStore;
 
+import java.io.IOException;
+import java.nio.ByteBuffer;
 import java.util.Collection;
 import java.util.function.Function;
 
@@ -39,17 +46,21 @@ public class DynamoDBTokenStore extends DatabaseContext implements TokenStore {
     }
 
     @Override
-    public void storeAccessToken(OAuth2AccessToken accessToken, OAuth2Authentication authentication) {
-
-        String authCode = (String)authentication.getOAuth2Request().getExtensions().get("auth_code");
+    public void storeAccessToken(OAuth2AccessToken accessToken, OAuth2Authentication authentication) { String authCode = (String)authentication.getOAuth2Request().getExtensions().get("auth_code");
         String clientId = (String)authentication.getOAuth2Request().getExtensions().get("client_id");
+
+        String json = jsponMap(authentication);
 
         System.out.println("Creating mapping for parse Item on database");
         Function<OAuth2AccessToken, Item> mapper = oAuth2AccessTokenMapper
                 .parse(accessToken, "state")
-                .andThen(item -> item.withString("client_id", clientId).withLong("ttl", Long.parseLong("123456")).withPrimaryKey(KEY_NAME, authCode));
+                .andThen(item -> item.with("authenticationObject", json)
+                        .withString("client_id", clientId)
+                        .withLong("ttl", Long.parseLong("123456"))
+                        .withPrimaryKey(KEY_NAME, authCode));
 
         this.create(mapper).apply(accessToken);
+
 
     }
 
@@ -110,5 +121,36 @@ public class DynamoDBTokenStore extends DatabaseContext implements TokenStore {
     protected String getTableName() {
         System.out.println("Getting table name from settings");
         return "dispatcher-tokenStore";//TODO: Move this to configuration
+    }
+
+    private String jsponMap(OAuth2Authentication authentication) {
+        ObjectMapper mapper = new ObjectMapper();
+
+        try {
+
+            // Convert object to JSON string
+            String jsonInString = mapper.writeValueAsString(new SerializableOAuth2Authentication(authentication));
+            System.out.println("-=-=-=-=-==-BOJJJJJJJECT1: " + jsonInString);
+
+            //DispatcherUtil.convertJsonToOAuth2Authentication(jsonInString);
+
+            //SerializableOAuth2Authentication obj = mapper.readValue(jsonInString, SerializableOAuth2Authentication.class);
+
+
+            return jsonInString;
+
+            // Convert object to JSON string and pretty print
+            //String jsonInString1 = mapper.writerWithDefaultPrettyPrinter().writeValueAsString(authentication);
+            //System.out.println("-=-=-=-=-==-BOJJJJJJJECT2: " + jsonInString1);
+
+
+        } catch (JsonGenerationException e) {
+            e.printStackTrace();
+        } catch (JsonMappingException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return null;
     }
 }
