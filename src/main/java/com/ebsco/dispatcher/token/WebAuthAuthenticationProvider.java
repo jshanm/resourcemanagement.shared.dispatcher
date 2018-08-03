@@ -10,7 +10,7 @@ public class WebAuthAuthenticationProvider implements AuthenticationProvider {
 
         System.out.println("authentication: " + authentication);
 
-        System.out.println("WebAuthAuthenticationProvider:  + authenticate");
+        System.out.println("WebAuthAuthenticationProvider:  + authentication");
         return authentication;
     }
 
