@@ -4,6 +4,7 @@ import com.ebsco.dispatcher.model.UserInformation;
 import com.ebsco.dispatcher.service.AuthorizationServerTokenServicesImpl;
 import com.ebsco.dispatcher.service.DatalockerService;
 import com.ebsco.dispatcher.service.DatalockerServiceImpl;
+import com.ebsco.dispatcher.token.scope.ContextManager;
 import com.ebsco.dispatcher.util.DispatcherUtil;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
@@ -14,8 +15,6 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.oauth2.common.util.RandomValueStringGenerator;
 import org.springframework.security.oauth2.provider.OAuth2Authentication;
 import org.springframework.security.oauth2.provider.OAuth2Request;
-import org.springframework.security.oauth2.provider.code.AuthorizationCodeServices;
-import org.springframework.security.oauth2.provider.code.InMemoryAuthorizationCodeServices;
 import org.springframework.security.oauth2.provider.token.AuthorizationServerTokenServices;
 import org.springframework.security.oauth2.provider.token.TokenStore;
 import org.springframework.web.bind.annotation.*;
@@ -27,12 +26,22 @@ import java.io.Serializable;
 import java.net.URL;
 import java.util.*;
 
+/**
+ * @author jshanmugam
+ *
+ */
+
 @RestController
 @RequestMapping("callback")
 public class CallbackController {
 
     @Autowired
     public TokenStore inMemoryTokenStore;
+
+    @Bean
+    private ContextManager contextManager() {
+        return new ContextManager();
+    };
 
     @Bean
     public DatalockerService datalockerService() {
@@ -74,6 +83,9 @@ public class CallbackController {
             Authentication authenticationObject = createAuthentication(user);
 
             OAuth2Authentication oAuth2Authentication  = new OAuth2Authentication(oauth2Request, authenticationObject);
+
+            //Store the OAuth2Authentication object in the ContextManager
+            contextManager().load(oAuth2Authentication);
 
             System.out.println("Auth Code Generated: "+ authCode);
 

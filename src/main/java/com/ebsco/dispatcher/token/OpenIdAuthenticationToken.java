@@ -13,7 +13,7 @@ import java.io.ObjectOutputStream;
 import java.text.ParseException;
 import java.util.Collection;
 
-public class OpenIdAuthenticationToken extends AbstractAuthenticationToken {
+public class  OpenIdAuthenticationToken extends AbstractAuthenticationToken {
     private static final long serialVersionUID = 22100073066377804L;
 
     private final ImmutableMap<String, String> principal;

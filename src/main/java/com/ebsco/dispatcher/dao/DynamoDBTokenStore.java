@@ -5,7 +5,6 @@ import com.amazonaws.services.dynamodbv2.document.Item;
 import com.ebsco.dispatcher.mapper.OAuth2AccessTokenMapper;
 import com.ebsco.dispatcher.mapper.OAuth2AccessTokenMapperImpl;
 import com.ebsco.dispatcher.model.SerializableOAuth2Authentication;
-import com.ebsco.dispatcher.util.DispatcherUtil;
 import com.fasterxml.jackson.core.JsonGenerationException;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -16,7 +15,6 @@ import org.springframework.security.oauth2.provider.OAuth2Authentication;
 import org.springframework.security.oauth2.provider.token.TokenStore;
 
 import java.io.IOException;
-import java.nio.ByteBuffer;
 import java.util.Collection;
 import java.util.function.Function;
 

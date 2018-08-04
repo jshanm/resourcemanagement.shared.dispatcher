@@ -1,9 +1,7 @@
-package com.ebsco.dispatcher.config;
+package com.ebsco.dispatcher.spring;
 
-import com.ebsco.dispatcher.dao.DynamoDBTokenStore;
 import com.ebsco.dispatcher.service.AuthCodeServiceImpl;
-import com.ebsco.dispatcher.service.AuthorizationServerTokenServicesImpl;
-import com.ebsco.dispatcher.service.InMemoryClientService;
+import com.ebsco.dispatcher.token.IdentityTokenEnhancer;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -19,7 +17,6 @@ import org.springframework.security.oauth2.provider.token.TokenEnhancerChain;
 import org.springframework.security.oauth2.provider.token.TokenStore;
 import org.springframework.security.oauth2.provider.token.store.InMemoryTokenStore;
 import org.springframework.security.oauth2.provider.token.store.JwtAccessTokenConverter;
-import org.springframework.security.oauth2.provider.token.store.JwtTokenStore;
 
 import java.util.Arrays;
 
@@ -38,6 +35,11 @@ public class AuthorizationServerConfig extends AuthorizationServerConfigurerAdap
             AuthorizationServerSecurityConfigurer oauthServer) throws Exception {
         oauthServer.tokenKeyAccess("permitAll()")
                 .checkTokenAccess("isAuthenticated()");
+    }
+
+    @Bean
+    public BCryptPasswordEncoder passwordEncoder() {
+        return new BCryptPasswordEncoder();
     }
 
     @Bean
@@ -75,14 +77,11 @@ public class AuthorizationServerConfig extends AuthorizationServerConfigurerAdap
 
     //-=-=-=-=-=--=-=-=-=-=-=-=--=-=-=-=-=-=-=--=-=-=-=-=-=-=--=-=-=-=-=-=-=--=-=-=-=-=-=-=--=-=-=-=-=-=-=--=-=-=-=-=-=-=--=-=-=-=-=-=-=--=-=-=-=-=-=-=--=-=
 
-    @Autowired
-    private BCryptPasswordEncoder passwordEncoder;
-
     @Override
     public void configure(ClientDetailsServiceConfigurer clients) throws Exception {
         clients.inMemory()
                 .withClient("resolver")
-                .secret(passwordEncoder.encode("secret"))
+                .secret(passwordEncoder().encode("secret"))
                 .authorizedGrantTypes("authorization_code")
                 .scopes("openid")
                 //.autoApprove(true)

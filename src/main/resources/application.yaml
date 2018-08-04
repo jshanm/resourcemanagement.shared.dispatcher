@@ -26,6 +26,9 @@ clients:
         - https://www.getpostman.com/oauth2/callback
         - https://resolver.ebscohost.com/openur
       loginUrl: http://auth-edc.ebscohost.com/login.aspx
+      signing:
+        defaultSignerKeyId: rsa1
+        defaultSigningAlgorithmName: RS256
 
     -
       id: client2
@@ -39,3 +42,6 @@ clients:
         - https://www.getpostman.com/oauth2/callback
         - https://resolver.ebscohost.com/openurl
       loginUrl: http://auth.ebsco.zone/api/oidcprovider
+      signing:
+        defaultSignerKeyId: rsa1
+        defaultSigningAlgorithmName: RS256

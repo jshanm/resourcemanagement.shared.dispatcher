@@ -1,7 +1,8 @@
 package com.ebsco.dispatcher.filters;
 
-import com.ebsco.dispatcher.config.ClientConfiguration;
-import com.ebsco.dispatcher.model.Client;
+import com.ebsco.dispatcher.client.ClientConfiguration;
+import com.ebsco.dispatcher.client.InMemoryClient;
+import com.ebsco.dispatcher.client.OAuth2Client;
 import com.ebsco.dispatcher.util.DispatcherUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.filter.GenericFilterBean;
@@ -66,7 +67,7 @@ public class ClientValidationFilter extends GenericFilterBean {
         }
 
         //Get the registered clients from the Configuration
-        Optional<List<Client>> registeredClients = Optional.of(clientConfig.getRegisteredClients());
+        Optional<List<InMemoryClient>> registeredClients = Optional.of(clientConfig.getRegisteredClients());
 
         //Error out if there is a problem in
         if (!registeredClients.isPresent() || registeredClients.get().isEmpty()) {
@@ -84,7 +85,7 @@ public class ClientValidationFilter extends GenericFilterBean {
         }
 
         //Load the needed client from the Configuration.
-        Optional<Client> client = Optional.of(clientConfig.loadClientById(clientIdFromRequest.get()));
+        Optional<InMemoryClient> client = Optional.of(clientConfig.loadClientById(clientIdFromRequest.get()));
 
         //Get the registered redirectURIs for the client.
         Optional<Set<String>> registeredRedirectURIs = Optional.of(client.get().getRegisteredRedirectURI());
