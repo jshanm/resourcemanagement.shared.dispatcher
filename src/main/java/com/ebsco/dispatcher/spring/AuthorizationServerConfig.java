@@ -1,6 +1,8 @@
 package com.ebsco.dispatcher.spring;
 
+import com.ebsco.dispatcher.client.InMemoryClientService;
 import com.ebsco.dispatcher.service.AuthCodeServiceImpl;
+import com.ebsco.dispatcher.service.AuthorizationServerTokenServicesImpl;
 import com.ebsco.dispatcher.token.IdentityTokenEnhancer;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
@@ -12,6 +14,7 @@ import org.springframework.security.oauth2.config.annotation.web.configuration.A
 import org.springframework.security.oauth2.config.annotation.web.configuration.EnableAuthorizationServer;
 import org.springframework.security.oauth2.config.annotation.web.configurers.AuthorizationServerEndpointsConfigurer;
 import org.springframework.security.oauth2.config.annotation.web.configurers.AuthorizationServerSecurityConfigurer;
+import org.springframework.security.oauth2.provider.ClientDetailsService;
 import org.springframework.security.oauth2.provider.token.TokenEnhancer;
 import org.springframework.security.oauth2.provider.token.TokenEnhancerChain;
 import org.springframework.security.oauth2.provider.token.TokenStore;
@@ -42,6 +45,9 @@ public class AuthorizationServerConfig extends AuthorizationServerConfigurerAdap
         return new BCryptPasswordEncoder();
     }
 
+   @Autowired
+   private InMemoryClientService clientService;
+
     @Bean
     public JwtAccessTokenConverter accessTokenConverter() {
         JwtAccessTokenConverter converter = new JwtAccessTokenConverter();
@@ -49,15 +55,13 @@ public class AuthorizationServerConfig extends AuthorizationServerConfigurerAdap
         return converter;
     }
 
+    @Autowired
+    private AuthCodeServiceImpl codeService;
+
 
     @Bean
     public TokenEnhancer identityTokenEnhancer() {
         return new IdentityTokenEnhancer();
-    }
-
-    @Bean
-    public TokenStore inMemoryTokenStore() {
-        return new InMemoryTokenStore();
     }
 
 
@@ -67,11 +71,11 @@ public class AuthorizationServerConfig extends AuthorizationServerConfigurerAdap
         TokenEnhancerChain enhancerChain = new TokenEnhancerChain();
         enhancerChain.setTokenEnhancers(Arrays.asList(identityTokenEnhancer(), accessTokenConverter()));
 
+        endpoints.setClientDetailsService(clientService);
         endpoints
-                //.tokenStore(dynamoDBTokenStore)
-                .authorizationCodeServices(new AuthCodeServiceImpl())
+                .tokenServices(new AuthorizationServerTokenServicesImpl())
+                .authorizationCodeServices(codeService)
                 .tokenEnhancer(enhancerChain);
-                //.accessTokenConverter(accessTokenConverter());
         ;
     }
 
@@ -84,7 +88,7 @@ public class AuthorizationServerConfig extends AuthorizationServerConfigurerAdap
                 .secret(passwordEncoder().encode("secret"))
                 .authorizedGrantTypes("authorization_code")
                 .scopes("openid")
-                //.autoApprove(true)
+                .autoApprove(true)
                 .redirectUris("http://localhost:8082/ui/login","http://localhost:8083/ui2/login", "https://www.getpostman.com/oauth2/callback");
     }
     /**

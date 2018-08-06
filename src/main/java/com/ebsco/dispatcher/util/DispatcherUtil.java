@@ -2,6 +2,7 @@ package com.ebsco.dispatcher.util;
 
 
 import com.ebsco.dispatcher.controller.CallbackController;
+import com.ebsco.dispatcher.mocks.model.PUAUserInfo;
 import com.ebsco.dispatcher.model.SerializableOAuth2Authentication;
 import com.ebsco.dispatcher.model.UserInformation;
 import com.ebsco.dispatcher.service.DatalockerService;
@@ -55,6 +56,7 @@ public class DispatcherUtil {
     }
 
     public static String base64Decode(String value) {
+        System.out.println("DispatcherUtil.base64Decode: Decoding :" + value);
         return new String(org.springframework.security.crypto.codec.Base64.decode(value.getBytes()));
     }
 
@@ -121,7 +123,7 @@ public class DispatcherUtil {
 
     public static OAuth2Authentication convertJsonToOAuth2Authentication() throws MalformedURLException, UnsupportedEncodingException {
 
-        UserInformation user = new DatalockerServiceImpl().getUserInformation("124443");
+        Optional<PUAUserInfo> userInfo = new DatalockerServiceImpl().getUserInfo("124443");
 
         String encodedAuthorizationContext = "aHR0cDovL2xvY2FsaG9zdDo4MDgxL29hdXRoL2F1dGhvcml6ZT9jbGllbnRfaWQ9d2ViYXV0aCZyZXNwb25zZV90eXBlPWNvZGUmcmVkaXJlY3RfdXJpPWh0dHBzOi8vd3d3LmdldHBvc3RtYW4uY29tL29hdXRoMi9jYWxsYmFjayZyZXNwb25zZV9tb2RlPXF1ZXJ5JnNjb3BlPXVzZXJfaW5mbyZzdGF0ZT1xd2VydCZhY3I9YWNyX3ZhbHVl";
 
@@ -131,14 +133,12 @@ public class DispatcherUtil {
 
         String authCode = "qwert";
 
-        OAuth2Request oauth2Request = new CallbackController().createOAuth2Request(authCode, queryParameters);
+        //OAuth2Request oauth2Request = new CallbackController().createOAuth2Request(authCode, queryParameters);
 
-        Authentication authenticationObject = new CallbackController().createAuthentication(user);
+        //Authentication authenticationObject = new CallbackController().createAuthentication(user);
 
-        OAuth2Authentication oAuth2Authentication  = new OAuth2Authentication(oauth2Request, authenticationObject);
+        //OAuth2Authentication oAuth2Authentication  = new OAuth2Authentication(oauth2Request, authenticationObject);
 
-        System.out.println("oAuth2Authentication.toString() = " + oAuth2Authentication);
-
-        return oAuth2Authentication;
+        return null;
     }
 }

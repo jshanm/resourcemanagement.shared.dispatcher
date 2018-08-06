@@ -8,6 +8,7 @@ import org.springframework.core.annotation.Order;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
+import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.AuthenticationEntryPoint;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
@@ -17,7 +18,7 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 
 @Configuration
 @Order(1)
-public class SecurityConfig extends WebSecurityConfigurerAdapter {
+public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 
     @Bean
     public AcrFilter getAcrFilter() throws Exception {
@@ -47,8 +48,10 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 .antMatchers(HttpMethod.GET, "/callback/**").permitAll()
                 .antMatchers("/token/**").permitAll()
                 .anyRequest().authenticated()
-                .and().exceptionHandling()
+                .and().httpBasic()
                 .authenticationEntryPoint(getAuthenticationEntryPoint());
+
+        http.sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS);
 
         http.addFilterBefore(getClientValidationFilter(), UsernamePasswordAuthenticationFilter.class);
         http.addFilterBefore(getAcrFilter(), UsernamePasswordAuthenticationFilter.class);

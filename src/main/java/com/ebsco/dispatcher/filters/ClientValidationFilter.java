@@ -37,7 +37,7 @@ public class ClientValidationFilter extends GenericFilterBean {
         HttpServletResponse res = (HttpServletResponse) response;
 
         // skip everything that's not an authorize URL
-        if (!DispatcherUtil.getPath(req).startsWith("/authorize")) {
+        if (!DispatcherUtil.getPath(req).startsWith("/oauth/authorize")) {
             System.out.println("SKIP: ClientValidationFilter");
             chain.doFilter(req, res);
             return;
@@ -79,7 +79,7 @@ public class ClientValidationFilter extends GenericFilterBean {
                 .anyMatch(client -> client.getId().equals(clientIdFromRequest.get()));
 
         if(!isValidClient) {
-            System.out.println("Invalid Client: "+ clientIdFromRequest);
+            System.out.println("Invalid Client: "+ clientIdFromRequest.get());
             res.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Internal Server Error");//TODO:Send OpenID standard HTTP and message
             return;
         }

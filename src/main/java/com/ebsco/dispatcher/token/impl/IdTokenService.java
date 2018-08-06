@@ -6,9 +6,9 @@ import com.ebsco.dispatcher.token.IdToken;
 import com.nimbusds.jwt.JWTClaimsSet;
 
 
-public class IdTokenService extends TokenService {
+public class IdTokenService  {
 
-    public IdTokenService(String clientId, String sub) {
+    /*public IdTokenService(String clientId, String sub) {
         super(clientId, sub);
     }
 
@@ -22,5 +22,5 @@ public class IdTokenService extends TokenService {
         }
         System.out.println("IdTokenServiceImpl.createIdToken: Problem in creating JWT claim set");
         return null;
-    }
+    }*/
 }

@@ -32,7 +32,7 @@ public class AcrFilter  extends OncePerRequestFilter {
         HttpServletResponse res = (HttpServletResponse) response;
 
         // skip everything that's not an authorize URL
-        if (!DispatcherUtil.getPath(req).startsWith("/authorize")) {
+        if (!DispatcherUtil.getPath(req).startsWith("/oauth/authorize")) {
             System.out.println("SKIP: AcrFilter");
             filterChain.doFilter(req, res);
             return;
