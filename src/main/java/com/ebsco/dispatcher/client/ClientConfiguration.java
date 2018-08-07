@@ -1,6 +1,6 @@
-package com.ebsco.dispatcher.config;
+package com.ebsco.dispatcher.client;
 
-import com.ebsco.dispatcher.model.Client;
+import com.ebsco.dispatcher.client.OAuth2Client;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Configuration;
 
@@ -14,17 +14,17 @@ import java.util.List;
 @Configuration
 public class ClientConfiguration {
 
-    private List<Client> registeredClients;
+    private List<InMemoryClient> registeredClients;
 
-    public List<Client> getRegisteredClients() {
+    public List<InMemoryClient> getRegisteredClients() {
         return registeredClients;
     }
 
-    public void setRegisteredClients(List<Client> registeredClients) {
+    public void setRegisteredClients(List<InMemoryClient> registeredClients) {
         this.registeredClients = registeredClients;
     }
 
-    public Client loadClientById(String id) {
+    public InMemoryClient loadClientById(String id) {
         return this.getRegisteredClients().stream()
                 .filter(t -> t.getId().equals(id))
                 .findAny()

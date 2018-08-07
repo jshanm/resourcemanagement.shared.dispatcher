@@ -1,0 +1,62 @@
+[
+	{
+		"ParameterKey": "AppType",
+		"ParameterValue": "java"
+	},
+	{
+		"ParameterKey": "JVMArgs",
+		"ParameterValue": "-Xmx768m -Xms128m -Dserver.port=8081 -Dapplication.team=Authenticators -Dspring.profiles.active=%ENVIRONMENT_VALUE"
+	},
+	{
+		"ParameterKey": "TaskMemory",
+		"ParameterValue": "1024"
+	},
+	{
+		"ParameterKey": "TaskRole",
+		"ParameterValue": "RoleDispatcher-ResourcemanagementShared"
+	},
+	{
+		"ParameterKey": "ECSScalingRole",
+		"ParameterValue": "%ECS_AUTOSCALING_ROLE"
+	},
+	{
+		"ParameterKey": "Environment",
+		"ParameterValue": "%ENVIRONMENT_VALUE"
+	},
+	{
+		"ParameterKey": "ProjectName",
+		"ParameterValue": "%PROJECT_NAME"
+	},
+	{
+		"ParameterKey": "TeamName",
+		"ParameterValue": "%TEAM_NAME"
+	},
+	{
+		"ParameterKey": "ClusterName",
+		"ParameterValue": "%CLUSTER_NAME"
+	},
+	{
+		"ParameterKey": "ImageId",
+		"ParameterValue": "%IMAGEID"
+	},
+	{
+		"ParameterKey": "AppVersion",
+		"ParameterValue": "%APPVERSION"
+	},
+	{
+		"ParameterKey": "ContainerPort",
+		"ParameterValue": "8082"
+	},
+	{
+		"ParameterKey": "DesiredCapacity",
+		"ParameterValue": "2"
+	},
+	{
+		"ParameterKey": "MaxCapacity",
+		"ParameterValue": "20"
+	},
+	{
+		"ParameterKey": "MinCapacity",
+		"ParameterValue": "2"
+	}
+]

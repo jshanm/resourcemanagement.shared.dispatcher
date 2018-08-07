@@ -1,7 +1,6 @@
 package com.ebsco.dispatcher.mapper;
 
 import com.amazonaws.services.dynamodbv2.document.Item;
-//import com.ebsco.dispatcher.model.OAuth2AccessToken;
 import org.springframework.security.oauth2.common.OAuth2AccessToken;
 
 

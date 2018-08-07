@@ -1,6 +1,8 @@
-package com.ebsco.dispatcher.config;
+package com.ebsco.dispatcher.spring;
 
-import com.ebsco.dispatcher.model.Client;
+import com.ebsco.dispatcher.client.ClientConfiguration;
+import com.ebsco.dispatcher.client.InMemoryClient;
+import com.ebsco.dispatcher.client.OAuth2Client;
 import com.ebsco.dispatcher.util.AuthTypeUtil;
 import com.ebsco.dispatcher.util.DispatcherUtil;
 import org.codehaus.httpcache4j.uri.URIBuilder;
@@ -8,11 +10,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.web.authentication.LoginUrlAuthenticationEntryPoint;
 
-import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.Map;
@@ -70,7 +70,7 @@ public class LoginEntryPointer extends LoginUrlAuthenticationEntryPoint {
         if(!queryParameters.isEmpty()) {
             Optional<String> clientIdFromRequest = Optional.of(queryParameters.get("client_id"));
             if(clientIdFromRequest.isPresent()) {
-                Optional<Client> client = Optional.of(clientConfig.loadClientById(clientIdFromRequest.get()));
+                Optional<InMemoryClient> client = Optional.of(clientConfig.loadClientById(clientIdFromRequest.get()));
                 return client.get().getLoginUrl();
             } //TODO: Implement "else" logic
         }

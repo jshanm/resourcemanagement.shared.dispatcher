@@ -1,6 +1,9 @@
-package com.ebsco.dispatcher.config;
+package com.ebsco.dispatcher.spring;
 
-import com.ebsco.dispatcher.dao.DynamoDBTokenStore;
+import com.ebsco.dispatcher.client.InMemoryClientService;
+import com.ebsco.dispatcher.service.AuthCodeServiceImpl;
+import com.ebsco.dispatcher.service.AuthorizationServerTokenServicesImpl;
+import com.ebsco.dispatcher.token.IdentityTokenEnhancer;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -11,8 +14,14 @@ import org.springframework.security.oauth2.config.annotation.web.configuration.A
 import org.springframework.security.oauth2.config.annotation.web.configuration.EnableAuthorizationServer;
 import org.springframework.security.oauth2.config.annotation.web.configurers.AuthorizationServerEndpointsConfigurer;
 import org.springframework.security.oauth2.config.annotation.web.configurers.AuthorizationServerSecurityConfigurer;
+import org.springframework.security.oauth2.provider.ClientDetailsService;
+import org.springframework.security.oauth2.provider.token.TokenEnhancer;
+import org.springframework.security.oauth2.provider.token.TokenEnhancerChain;
 import org.springframework.security.oauth2.provider.token.TokenStore;
 import org.springframework.security.oauth2.provider.token.store.InMemoryTokenStore;
+import org.springframework.security.oauth2.provider.token.store.JwtAccessTokenConverter;
+
+import java.util.Arrays;
 
 /**
  * @author jshanmugam
@@ -30,62 +39,56 @@ public class AuthorizationServerConfig extends AuthorizationServerConfigurerAdap
         oauthServer.tokenKeyAccess("permitAll()")
                 .checkTokenAccess("isAuthenticated()");
     }
-    //-=-=-=-=-=--=-=-=-=-=-=-=--=-=-=-=-=-=-=--=-=-=-=-=-=-=--=-=-=-=-=-=-=--=-=-=-=-=-=-=--=-=-=-=-=-=-=--=-=-=-=-=-=-=--=-=-=-=-=-=-=--=-=-=-=-=-=-=--=-=
 
-   /* @Bean
+    @Bean
+    public BCryptPasswordEncoder passwordEncoder() {
+        return new BCryptPasswordEncoder();
+    }
+
+   @Autowired
+   private InMemoryClientService clientService;
+
+    @Bean
     public JwtAccessTokenConverter accessTokenConverter() {
         JwtAccessTokenConverter converter = new JwtAccessTokenConverter();
         converter.setSigningKey("123");
         return converter;
-    }*/
-
-
-    /*@Bean
-    public TokenStore tokenStore() {
-        return new JwtTokenStore(accessTokenConverter());
-    }*/
-
-    @Bean
-    public TokenStore inMemoryTokenStore() {
-        return new InMemoryTokenStore();
     }
 
-    public TokenStore dynamoDBTokenStore;
+    @Autowired
+    private AuthCodeServiceImpl codeService;
 
-    /*@Bean
-    public TokenStore inMemoryTokenStore() {
-        return new InMemoryTokenStore();
-    }*/
 
-    /*@Bean
-    @Primary
-    public DefaultTokenServices tokenServices() {
-        DefaultTokenServices defaultTokenServices = new DefaultTokenServices();
-        defaultTokenServices.setTokenStore(tokenStore());
-        defaultTokenServices.setSupportRefreshToken(true);
-        return defaultTokenServices;
-    }*/
+    @Bean
+    public TokenEnhancer identityTokenEnhancer() {
+        return new IdentityTokenEnhancer();
+    }
+
 
     @Override
     public void configure(AuthorizationServerEndpointsConfigurer endpoints) throws Exception {
 
-        endpoints.tokenStore(dynamoDBTokenStore);
-        System.out.println("findTokensByClientId: " + endpoints.getTokenStore().findTokensByClientId("webauth"));
+        TokenEnhancerChain enhancerChain = new TokenEnhancerChain();
+        enhancerChain.setTokenEnhancers(Arrays.asList(identityTokenEnhancer(), accessTokenConverter()));
+
+        endpoints.setClientDetailsService(clientService);
+        endpoints
+                .tokenServices(new AuthorizationServerTokenServicesImpl())
+                .authorizationCodeServices(codeService)
+                .tokenEnhancer(enhancerChain);
+        ;
     }
 
     //-=-=-=-=-=--=-=-=-=-=-=-=--=-=-=-=-=-=-=--=-=-=-=-=-=-=--=-=-=-=-=-=-=--=-=-=-=-=-=-=--=-=-=-=-=-=-=--=-=-=-=-=-=-=--=-=-=-=-=-=-=--=-=-=-=-=-=-=--=-=
 
-    @Autowired
-    private BCryptPasswordEncoder passwordEncoder;
-
     @Override
     public void configure(ClientDetailsServiceConfigurer clients) throws Exception {
         clients.inMemory()
-                .withClient("webauth")
-                .secret(passwordEncoder.encode("secret"))
+                .withClient("resolver")
+                .secret(passwordEncoder().encode("secret"))
                 .authorizedGrantTypes("authorization_code")
-                .scopes("user_info")
-                //.autoApprove(true)
+                .scopes("openid")
+                .autoApprove(true)
                 .redirectUris("http://localhost:8082/ui/login","http://localhost:8083/ui2/login", "https://www.getpostman.com/oauth2/callback");
     }
     /**

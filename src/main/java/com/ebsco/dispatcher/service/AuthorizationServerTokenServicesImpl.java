@@ -1,6 +1,11 @@
 package com.ebsco.dispatcher.service;
 
+import com.auth0.jwt.Algorithm;
+import com.auth0.jwt.JWTVerifier;
 import com.ebsco.dispatcher.dao.DynamoDBTokenStore;
+import com.ebsco.dispatcher.util.DispatcherUtil;
+import com.nimbusds.jwt.JWT;
+import com.nimbusds.jwt.SignedJWT;
 import org.springframework.context.annotation.Bean;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.GrantedAuthority;
@@ -28,11 +33,29 @@ public class AuthorizationServerTokenServicesImpl implements AuthorizationServer
 
     @Override
     public OAuth2AccessToken createAccessToken(OAuth2Authentication authentication) throws AuthenticationException {
-        System.out.println("Creating Token...");
-        OAuth2AccessToken token = generateToken(authentication);
-        tokenStore().storeAccessToken(token, authentication);
-        return null;
+        //TODO: Get Token from the DynamoDB
+        //TODO: Decode the token.
+        //TODO: Make OAuth2AccessToken from Payload.
+        System.out.println("AuthorizationServerTokenServicesImpl.createAccessToken: Retreiving token from Dynamo");
+        String token = "eyJraWQiOiJyc2ExIiwiYWxnIjoiUlMyNTYifQ.eyJhdWQiOiJIS0FwVXM3VkY0Iiwicm9sZSI6W10sImFmZmlsaWF0aW9uIjpbeyJjdXN0IjoiZGVtbyIsImdyb3VwIjoibWFpbiJ9LHsiY3VzdCI6IndlYnRlc3RxYSIsImdyb3VwIjoibWFpbiJ9LHsiY3VzdCI6ImF3c2Jhc2ljIiwiZ3JvdXAiOiJtYWluIn1dLCJpc3MiOiJodHRwczpcL1wvYXV0aC5kZXZxYS5lYnNjby56b25lIiwiZXhwIjoxNTMzNTE5Mjc5LCJpYXQiOjE1MzM1MTg5NzksImp0aSI6IjM5ZjM3ZjQ4LTUxZDAtNGQ1Yi1hMjEzLTZiYTJmNzk1ZDYxMyJ9.PVMUxpNU8N9k5EmBc7L1syETV-27JjJaw5WIkFRFkj8GlMOugO_Z1hyR6QwcbSLxpqo7u0BA0TUVGEjizunQ5izYHfQf_3yOd6LgknSIRJRnqJA4jcNzq_IHwOPfCYbfICkiZ1RhittkP-7xPtXM2KFJLyke70HqwkCuhJYhfOPRqcaxMK5rtZIlBgq72a965ADGSYA8tXyKMOl5Tv89-Ci4Rdq983H7VE7VZgjJMGTKSVPYlZ5_kC6EXpXbMZCLsBu7tHyRfpwnD8x_0VnSJRMq3CEGvnwLhdjutpxCTi_mCoLrgn60mxZHRL39ABQi0AnrbXm7PlLgBqPOIBeefA";
+
+
+        String token1 = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXUyJ9.eyJpc3MiOiJhdXRoMCJ9.AbIJTDMFc7yUa5MhvcP03nJPyCPzZtQcGEp-zWfOkEE";
+
+            String[] split_string = token.split("\\.");
+            String base64EncodedHeader = split_string[0];
+            String base64EncodedBody = split_string[1];
+            String base64EncodedSignature = split_string[2];
+
+
+            System.out.println("~~~~~~~~~ JWT Body ~~~~~~~");
+            String body =  DispatcherUtil.base64Decode(base64EncodedBody);
+//            String body = new String(base64Url.decode(base64EncodedBody));
+            System.out.println("JWT Body : "+body);
+
+            return null;
     }
+
 
     @Override
     public OAuth2AccessToken refreshAccessToken(String refreshToken, TokenRequest tokenRequest) throws AuthenticationException {
@@ -106,6 +129,11 @@ public class AuthorizationServerTokenServicesImpl implements AuthorizationServer
         };
 
         return token;
+    }
+
+    private String generateTokenValue() {
+
+        return "";
 
     }
 }

@@ -1,9 +1,15 @@
 package com.ebsco.dispatcher.controller;
 
+import com.ebsco.dispatcher.client.ClientConfiguration;
+import com.ebsco.dispatcher.mocks.DatalockerServiceMock;
+import com.ebsco.dispatcher.mocks.model.PUAUserInfo;
 import com.ebsco.dispatcher.model.UserInformation;
+import com.ebsco.dispatcher.service.AuthCodeServiceImpl;
 import com.ebsco.dispatcher.service.AuthorizationServerTokenServicesImpl;
 import com.ebsco.dispatcher.service.DatalockerService;
 import com.ebsco.dispatcher.service.DatalockerServiceImpl;
+import com.ebsco.dispatcher.token.TokenService;
+import com.ebsco.dispatcher.token.scope.ContextManager;
 import com.ebsco.dispatcher.util.DispatcherUtil;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
@@ -15,7 +21,6 @@ import org.springframework.security.oauth2.common.util.RandomValueStringGenerato
 import org.springframework.security.oauth2.provider.OAuth2Authentication;
 import org.springframework.security.oauth2.provider.OAuth2Request;
 import org.springframework.security.oauth2.provider.code.AuthorizationCodeServices;
-import org.springframework.security.oauth2.provider.code.InMemoryAuthorizationCodeServices;
 import org.springframework.security.oauth2.provider.token.AuthorizationServerTokenServices;
 import org.springframework.security.oauth2.provider.token.TokenStore;
 import org.springframework.web.bind.annotation.*;
@@ -27,25 +32,48 @@ import java.io.Serializable;
 import java.net.URL;
 import java.util.*;
 
+/**
+ * @author jshanmugam
+ *
+ */
+
 @RestController
 @RequestMapping("callback")
 public class CallbackController {
 
+
+    @Autowired
+    private ContextManager contextManager;
+
+    @Autowired
+    private AuthCodeServiceImpl authCodeService;
+
     @Autowired
     public TokenStore inMemoryTokenStore;
 
+   /* @Autowired
+    public DatalockerServiceMock datalockerService;*/
+
     @Bean
     public DatalockerService datalockerService() {
-        return new DatalockerServiceImpl();
-    }
+        return new DatalockerServiceMock();
+    } //TODO: Change this DatalockerServiceImpl once implemented*/
 
     @Bean
     public RandomValueStringGenerator randomValueStringGenerator() {
         return new RandomValueStringGenerator();
     }
 
+    @Autowired
+    private ClientConfiguration clientConfig;
+
+    @Bean
+    private TokenService tokenService() {
+        return new TokenService(clientConfig);
+    }
+
     //TODO: Make Swagger configuration
-    @RequestMapping(value = "/webauth", method = RequestMethod.GET)
+    @RequestMapping(value = "/resolver", method = RequestMethod.GET)
     @ApiResponses(value = {
             @ApiResponse(code = 302, message = "OK"),
             @ApiResponse(code = 400,
@@ -53,121 +81,38 @@ public class CallbackController {
             @ApiResponse(code = 404, message = "NOT FOUND, user not found."),
             @ApiResponse(code = 500, message = "INTERNAL SERVER ERROR") })
     public void getAuthCode(HttpServletResponse response, @RequestParam(value = "datalockerKey") String datalockerKey, @RequestParam(value = "authorization_context") String encodedAuthorizationContext)
-            throws ServletException {
+            throws ServletException, IOException {
 
         System.out.print("datalockerKey: "+ datalockerKey);
 
-        UserInformation user = datalockerService().getUserInformation(datalockerKey);
+        tokenService().setClaimsSet("resolver", "sub");
+
+        // = datalockerService().getUserInfo(datalockerKey);
 
         try {
             //TODO: Implement Datalocker service
             //TODO: ganerate Authcode, Token and save them
 
-            String authRequest = DispatcherUtil.base64Decode(encodedAuthorizationContext);
+            this.contextManager.loadUserFromDatalocker(datalockerKey); //Calls the Data locker Service and sets the userinformation
 
-            Map<String, String> queryParameters = DispatcherUtil.splitQuery(new URL(authRequest));
+            this.contextManager.loadAuthenticationFromRequest(encodedAuthorizationContext);
 
-            String authCode = randomValueStringGenerator().generate();
+            Optional<OAuth2Authentication> authentication = this.contextManager.getAuthentication();
 
-            OAuth2Request oauth2Request = createOAuth2Request(authCode, queryParameters);
+            if(authentication.isPresent()) {
+                //AuthCodeServiceImpl authCodeService = new AuthCodeServiceImpl();
+                String authCode = authCodeService.createAuthorizationCode(authentication.get());
 
-            Authentication authenticationObject = createAuthentication(user);
+                System.out.println("CallbackController.getAuthCode" + "Auth Code Generated: "+ authCode);
 
-            OAuth2Authentication oAuth2Authentication  = new OAuth2Authentication(oauth2Request, authenticationObject);
-
-            System.out.println("Auth Code Generated: "+ authCode);
-
-            generateAndStoreToken(authCode, oAuth2Authentication);
+                response.sendRedirect("http://atemppageuselessJPage.com/callback?code="+authCode); //Store the URL in the application yaml
+            }
 
 
-            response.sendRedirect("http://atemppageuselessJPage.com/callback?code="+authCode);
         } catch (IOException e) {
             e.printStackTrace();
         }
-    }
-
-    private void generateAndStoreToken(String authCode, OAuth2Authentication authentication) {
-
-        AuthorizationServerTokenServices tokenService = new AuthorizationServerTokenServicesImpl();
-        tokenService.createAccessToken(authentication);
-
-
-    }
-
-    private OAuth2Request createOAuth2Request(String authCode, Map<String, String> queryParameters) {
-
-        GrantedAuthority authority = new GrantedAuthority() {
-            @Override
-            public String getAuthority() {
-                return "authorization_code";
-            }
-        };
-        Set<GrantedAuthority> authorities = new HashSet<>();
-        authorities.add(authority);
-
-        Set<String> scope = new HashSet<>();
-        scope.add(queryParameters.get("scope")); //TODO: Make it a Set, not String
-
-        Set<String> responseTypes = new HashSet<>();
-        scope.add(queryParameters.get("response_type")); //TODO: Make it a Set, not String
-
-        String redirectUri = queryParameters.get("redirect_uri"); //TODO: Default the redirect URI if not found in the request
-
-        Map<String, Serializable> extensionProperties = new HashMap<>();
-        extensionProperties.put("client_id", queryParameters.get("client_id"));
-        extensionProperties.put("auth_code", authCode);
-
-
-        OAuth2Request oAuth2Request =  new OAuth2Request(queryParameters, "webauth", authorities,  true, scope, null, redirectUri, responseTypes, extensionProperties);
-        return oAuth2Request;
-    }
-
-    private Authentication createAuthentication(UserInformation userInformation) {
-
-        GrantedAuthority authority = new GrantedAuthority() {
-            @Override
-            public String getAuthority() {
-                return "authorization_code";
-            }
-        };
-        Set<GrantedAuthority> authorities = new HashSet<>();
-        authorities.add(authority);
-
-        return new Authentication() {
-            @Override
-            public Collection<? extends GrantedAuthority> getAuthorities() {
-                return authorities;
-            }
-
-            @Override
-            public Object getCredentials() {
-                return null;
-            }
-
-            @Override
-            public Object getDetails() {
-                return null;
-            }
-
-            @Override
-            public Object getPrincipal() {
-                return userInformation.getUserName();
-            }
-
-            @Override
-            public boolean isAuthenticated() {
-                return true;
-            }
-
-            @Override
-            public void setAuthenticated(boolean isAuthenticated) throws IllegalArgumentException {
-
-            }
-
-            @Override
-            public String getName() {
-                return userInformation.getName();
-            }
-        };
+        System.out.println("CallbackController.getAuthCode: Exception");
+        //response.sendError(HttpServletResponse.SC_UNAUTHORIZED); //TODO: Refine it
     }
 }

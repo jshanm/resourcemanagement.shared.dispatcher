@@ -1,4 +1,4 @@
-package com.ebsco.dispatcher.config;
+package com.ebsco.dispatcher.spring;
 
 import com.ebsco.dispatcher.filters.AcrFilter;
 import com.ebsco.dispatcher.filters.ClientValidationFilter;
@@ -9,16 +9,8 @@ import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.config.http.SessionCreationPolicy;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-import org.springframework.security.oauth2.client.filter.OAuth2ClientContextFilter;
-import org.springframework.security.oauth2.provider.ClientDetailsService;
 import org.springframework.security.web.AuthenticationEntryPoint;
-import org.springframework.security.web.authentication.LoginUrlAuthenticationEntryPoint;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
-import org.springframework.security.web.authentication.preauth.AbstractPreAuthenticatedProcessingFilter;
-
-import java.util.Arrays;
-import java.util.List;
 
 /**
  * @author jshanmugam
@@ -26,7 +18,7 @@ import java.util.List;
 
 @Configuration
 @Order(1)
-public class SecurityConfig extends WebSecurityConfigurerAdapter {
+public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 
     @Bean
     public AcrFilter getAcrFilter() throws Exception {
@@ -56,8 +48,10 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 .antMatchers(HttpMethod.GET, "/callback/**").permitAll()
                 .antMatchers("/token/**").permitAll()
                 .anyRequest().authenticated()
-                .and().exceptionHandling()
+                .and().httpBasic()
                 .authenticationEntryPoint(getAuthenticationEntryPoint());
+
+        http.sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS);
 
         http.addFilterBefore(getClientValidationFilter(), UsernamePasswordAuthenticationFilter.class);
         http.addFilterBefore(getAcrFilter(), UsernamePasswordAuthenticationFilter.class);

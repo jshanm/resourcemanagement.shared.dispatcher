@@ -1,5 +1,100 @@
+spring:
+  application:
+    name: resourcemanagement.shared.dispatcher
+    version: ${APP_VERSION:unknown}
+  zipkin:
+    baseUrl: "http://zipkin.vpca.us-east-1.eis-delivery${AWS_ENV}.cloud/"
+    service:
+      name: ${spring.application.name}:${spring.application.version}
+    sleuth:
+      sampler:
+      percentage: 0.5f
+
 server:
   port: 8081
+  servlet:
+    context-path:
+
+eureka:
+  instance:
+    nonSecurePort: ${PUBLIC_PORT:8082}
+    statusPageUrlPath: ${server.contextPath}/info
+    healthCheckUrlPath: ${server.contextPath}/health
+    appname: ${spring.application.name}
+    instanceId: ${spring.application.name}:${APP_VERSION}:${spring.application.instance_id:${HOSTNAME}}
+    metadataMap:
+      instanceId: ${spring.application.name}:${APP_VERSION}:${spring.application.instance_id:${HOSTNAME}}
+      version: ${APP_VERSION}
+  client:
+    registerWithEureka: true
+    fetchRegistry: true
+    healthcheck:
+      enabled: true
+    serviceUrl:
+      defaultZone: "http://eureka.vpca.us-east-1.eis-delivery${AWS_ENV}.cloud:8761/eureka/"
+
+metric:
+  enabled: true
+  polling:
+    duration: 5
+  datadog:
+    reporter:
+      enabled: true
+info:
+  # application: resourcemanagement.shared.dispatcher
+  market: shared
+  domain: resourcemanagement
+  # version: ${APP_VERSION:unknown}
+  containerId: ${HOSTNAME:container}
+
+response:
+  wrapper:
+    handler:
+      enabled: true
+
+audit:
+  request:
+    response:
+      handler:
+        enabled: true
+
+swagger:
+  title: Dispatcher
+  description: Dispacther REST Services
+  contact:
+    name: Authenticators
+    url: http://www.ebsco.com
+    email: EIS.AWSPlatform_Authenticators@ebsco.com
+  version: 1.0.0
+  path:
+    selector:
+      type:
+        none:
+          enabled: false
+        any:
+          enabled: false
+        regex:
+          enabled: true
+      regex:
+        value: /callback
+
+log:
+  application:
+    market: ${application.market}
+    domain: ${application.domain}
+    subenv: ${application.subenv}
+    environment: ${application.environment}
+    containerId: ${application.containerId}
+    transactionIdHeader: ${application.transactionIdHeader}
+
+
+# enable DataDogEventReporter and lifecycle reporting (lib-discover-shared-beanbag)
+beanbag.datadog.eventreporter.enabled: true
+#overriding beanbag configs
+beanbag.swaggerconfig.enabled: false
+beanbag.eurekaclientconfig.enabled: false
+
+
 security:
   oauth2:
     client:
@@ -15,18 +110,20 @@ security:
 clients:
   registeredClients:
     -
-      id: webauth
+      id: resolver
       clientSecret: secret
       grantType:
         - authorization_code
       scope:
-        - user_info
+        - openid
         - read
-        - write
       registeredRedirectURI:
         - https://www.getpostman.com/oauth2/callback
         - https://resolver.ebscohost.com/openur
       loginUrl: http://auth-edc.ebscohost.com/login.aspx
+      signing:
+        defaultSignerKeyId: rsa1
+        defaultSigningAlgorithmName: RS256
 
     -
       id: client2
@@ -34,10 +131,32 @@ clients:
       grantType:
         - authorization_code
       scope:
-        - user_info
+        - openid
         - read
-        - write
       registeredRedirectURI:
         - https://www.getpostman.com/oauth2/callback
         - https://resolver.ebscohost.com/openurl
       loginUrl: http://auth.ebsco.zone/api/oidcprovider
+      signing:
+        defaultSignerKeyId: rsa1
+        defaultSigningAlgorithmName: RS256
+
+---
+spring:
+  profiles: local
+
+eureka:
+  aws:
+    registration:
+      enabled: false
+  instance:
+    hostname: ${vipAddress:dispacther}
+  client:
+    registerWithEureka: false
+    fetchRegistry: false
+
+logging:
+  level:
+    root: DEBUG
+
+beanbag.datadog.eventreporter.enabled: false

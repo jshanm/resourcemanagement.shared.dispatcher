@@ -5,7 +5,6 @@ import com.ebsco.dispatcher.util.DispatcherUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.web.filter.OncePerRequestFilter;
-import org.thymeleaf.extras.springsecurity4.auth.AuthUtils;
 
 import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
@@ -32,7 +31,7 @@ public class AcrFilter  extends OncePerRequestFilter {
         HttpServletResponse res = (HttpServletResponse) response;
 
         // skip everything that's not an authorize URL
-        if (!DispatcherUtil.getPath(req).startsWith("/authorize")) {
+        if (!DispatcherUtil.getPath(req).startsWith("/oauth/authorize")) {
             System.out.println("SKIP: AcrFilter");
             filterChain.doFilter(req, res);
             return;
