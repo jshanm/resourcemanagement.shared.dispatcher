@@ -1,2 +1,2 @@
 # resourcemanagement.shared.dispatcher
-Dispatcher Application for Webauth login
+Dispatcher Application for Webauth login.
