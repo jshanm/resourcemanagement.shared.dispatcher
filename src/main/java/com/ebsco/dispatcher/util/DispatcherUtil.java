@@ -1,6 +1,7 @@
 package com.ebsco.dispatcher.util;
 
 
+import com.amazonaws.util.NumberUtils;
 import com.ebsco.dispatcher.controller.CallbackController;
 import com.ebsco.dispatcher.mocks.model.PUAUserInfo;
 import com.ebsco.dispatcher.model.SerializableOAuth2Authentication;
@@ -140,5 +141,9 @@ public class DispatcherUtil {
         //OAuth2Authentication oAuth2Authentication  = new OAuth2Authentication(oauth2Request, authenticationObject);
 
         return null;
+    }
+
+    public static Optional<Integer> convertStringToInt(String string) {
+        return Optional.of(NumberUtils.tryParseInt(string));
     }
 }

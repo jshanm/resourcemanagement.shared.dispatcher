@@ -1,8 +1,6 @@
 package com.ebsco.dispatcher.service;
 
-import com.ebsco.dispatcher.mocks.DatalockerServiceMock;
 import com.ebsco.dispatcher.token.scope.ContextManager;
-import com.ebsco.dispatcher.util.DispatcherUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.security.oauth2.common.exceptions.InvalidGrantException;
@@ -10,11 +8,8 @@ import org.springframework.security.oauth2.common.util.RandomValueStringGenerato
 import org.springframework.security.oauth2.provider.OAuth2Authentication;
 import org.springframework.security.oauth2.provider.code.AuthorizationCodeServices;
 import org.springframework.security.oauth2.provider.token.AuthorizationServerTokenServices;
-import org.springframework.security.oauth2.provider.token.TokenStore;
 import org.springframework.stereotype.Service;
 
-import java.io.UnsupportedEncodingException;
-import java.net.MalformedURLException;
 import java.util.Optional;
 
 @Service
@@ -64,14 +59,12 @@ public class AuthCodeServiceImpl implements AuthorizationCodeServices {
 
         System.out.println("AuthCodeServiceImpl.consumeAuthorizationCode: " + code);
 
-        this.contextManager.loadUserFromDatalocker("12321"); //Calls the Data locker Service and sets the userinformation
+        this.contextManager.loadUser("12321"); //Calls the Data locker Service and sets the userinformation
 
         try {
             this.contextManager.loadAuthenticationFromRequest("aHR0cDovL2xvY2FsaG9zdDo4MDgxL29hdXRoL2F1dGhvcml6ZT9jbGllbnRfaWQ9cmVzb2x2ZXImcmVzcG9uc2VfdHlwZT1jb2RlJnJlZGlyZWN0X3VyaT1odHRwczovL3d3dy5nZXRwb3N0bWFuLmNvbS9vYXV0aDIvY2FsbGJhY2smcmVzcG9uc2VfbW9kZT1xdWVyeSZzY29wZT11c2VyX2luZm8mc3RhdGU9cXdlcnQmYWNyPWFjcl92YWx1ZQ");
             return this.contextManager.getAuthentication().get();
-        } catch (MalformedURLException e) {
-            e.printStackTrace();
-        } catch (UnsupportedEncodingException e) {
+        } catch (Exception e) {
             e.printStackTrace();
         }
 
